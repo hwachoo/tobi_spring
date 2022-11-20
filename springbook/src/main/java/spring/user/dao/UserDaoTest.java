@@ -1,9 +1,10 @@
 package spring.user.dao;
 
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
-//import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,7 +36,7 @@ public class UserDaoTest {
 	//test가 실행되기 전 먼저 실행할 메소드 정의
 	@Before
 	public void setUp() {
-		ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
+//		ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
 		this.dao = context.getBean("userDao", UserDao.class);
 		
 		this.user1 = new User("gyumee", "박성철", "springno1");
@@ -49,51 +49,57 @@ public class UserDaoTest {
 	}
 	
 	@Test
+	public void getAll() throws SQLException, ClassNotFoundException {
+		dao.deleteAll();
+		
+		List<User> users0 = dao.getAll();
+		assertThat(users0.size(), is(0));
+		
+		dao.add(user1);
+		List<User> users1 = dao.getAll();
+		assertThat(users1.size(), is(1));
+		checkSameUser(user1, users1.get(0));
+		
+		
+		dao.add(user2);
+		List<User> users2 = dao.getAll();
+		assertThat(users2.size(), is(2));
+		checkSameUser(user2, users2.get(0));
+		checkSameUser(user2, users2.get(1));
+		
+		dao.add(user3);
+		List<User> users3 = dao.getAll();
+		assertThat(users3.size(), is(3));
+		checkSameUser(user3, users3.get(0));
+		checkSameUser(user3, users3.get(1));
+		checkSameUser(user3, users3.get(2));
+		
+	}
+	
+	private void checkSameUser(User user1, User user2) {
+		assertThat(user1.getId(), is(user2.getId()));
+		assertThat(user1.getName(), is(user2.getName()));
+		assertThat(user1.getPassword(), is(user2.getPassword()));
+		
+	}
+	
+	@Test
 	public void addAndGet() throws ClassNotFoundException, SQLException{
-//		ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-//		
-//		UserDao dao = context.getBean("userDao", UserDao.class);
-//		
-//		dao.deleteAll();
-//		assertThat(dao.getCount(), is(0));
-//		
-//		User user = new User("gyumee", "박성철", "springno1");
-//		User user2 = new User("leegw700", "이길원", "springno2");
-//		User user3 = new User("bumjin", "박범진", "springno3");
 		
 		dao.deleteAll();
 		assertThat(dao.getCount(), is(0));
 		
 		dao.add(user1);
-		dao.add(user2);
-		assertThat(dao.getCount(), is(2));
+		assertThat(dao.getCount(), is(1));
 		
-		User userget1 = dao.get(user1.getId());
-		assertThat(userget1.getName(),is(user1.getName()));
-		assertThat(userget1.getPassword(), is(user1.getPassword()));
-		
-		User userget2 = dao.get(user2.getId());
-		assertThat(userget2.getName(),is(user2.getName()));
-		assertThat(userget2.getPassword(), is(user2.getPassword()));
-		
-		
-		//User의 클래스를 수정함으로써 get/set을 사용할 수 없게 됨
-//		user.setId("gyumee1");
-//		user.setName("박성철");
-//		user.setPassword("spring1");
-//		
-//		dao.add(user);
-//		assertThat(dao.getCount(), is(1));
-//		
-//		User user2 = dao.get(user.getId());
-//		
-//		assertThat(user2.getName(), is(user.getName()));
-//		assertThat(user2.getPassword(), is(user.getPassword()));
+		User user2 = dao.get(user1.getId());
+		assertThat(user2.getName(),is(user1.getName()));
+		assertThat(user2.getPassword(), is(user1.getPassword()));
 		
 	}
 	
 	//테스트 중 발생할 것으로 예상되는 예외 클래스 지정
-//	@Test(expected = EmptyResultDataAccessException.class) - 예외 import가 안됨
+//	@Test(expected = EmptyResultDataAccessException.class) // 예외 import가 안됨
 //	public void getUserFailure() throws SQLException {
 //		ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
 //		
@@ -101,48 +107,21 @@ public class UserDaoTest {
 //		dao.deleteAll();
 //		assertThat(dao.getCount(), is(0));
 //		
-//			dao.get("unknown_id");
-		
-		
-		
+//			try {
+//				dao.get("unknown_id");
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		
+//		
+//		
 //	}
 	
 	
 	public static void main(String[] args) {
 		JUnitCore.main("spring.user.dao.UserDaoTest");
 	}
-
-
-//	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-//		
-////		ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
-//		
-//		UserDao dao = new UserDao();
-//		
-//		User user = new User();
-//		user.setId("whiteship3");
-//		user.setName("백기선");
-//		user.setPassword("married");
-//		
-//		dao.add(user);
-//		
-//		System.out.println(user.getId() +  "등록 성공");
-//		
-//		User user2 =dao.get(user.getId());
-////		System.out.println(user2.getName());
-////		System.out.println(user2.getPassword());
-////		System.out.println(user2.getId() +  "조회 성공");
-//		
-//		//실패의 종류를 파악하기 위해 조회 시 실패한 부분의 예외 분류
-//		if(!user.getName().equals(user2.getName())) {
-//			System.out.println("테스트 실패 (name)");
-//		}else if(!user.getPassword().equals(user2.getPassword())) {
-//			System.out.println("테스트 실패 (password)");
-//		}else {
-//			System.out.println("조회 테스트 성공");
-//			
-//		}
-//		
-//	}
 
 }
